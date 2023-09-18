@@ -4,17 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Intro</title>
+    <style> 
+    /* Element selector */
+        h1, #hobbies {
+            color: red;
+            background-color: yellow
+        }
+
+    /* ID selector */
+        #hobbies {
+        border: 2px solid green;
+    }
+    /* apply to all li elements that are children of #hobbies 
+    (any elements with that ID) */
+        #hobbies li {
+            background: lightblue;
+        }
+    
+        li:hover, #hobbies li:hover {
+            background: lightgreen;
+        }
+
+    /* Class selector */
+    .big {
+        font-size: 2em;
+    }
+    </style>
 </head>
-<body>
-<h1>Heading 1</h1>   
-<h2>heading 2</h2>    
-<h3>heading 3</h3>
-<h4>heading 4</h4>
-<h5>heading 5</h5>
-<h6>heading 6</h6>
-<p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Tenetur ratione quas quisquam fugiat iusto minus delectus atque ipsam exercitationem explicabo. Nemo suscipit aperiam at deserunt velit ipsum reprehenderit in maiores.</p>
-<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem, magni?</p>
-<img src="http://placekitten.com/300" alt="Cute kitten photo">
-<a href="http://google.com/">Go to Google!</a>
+<body>                        
+    <h1>Heading 1</h1>   
+    <h2>heading 2</h2>    
+    <h3>heading 3</h3>
+    <h4>heading 4</h4>
+    <h5>heading 5</h5>
+    <h6>heading 6</h6>
+    <p class= "big" >Lorem ipsum dolor sit amet consectetur, adipisicing elit. Tenetur ratione quas quisquam fugiat iusto minus delectus atque ipsam exercitationem explicabo. Nemo suscipit aperiam at deserunt velit ipsum reprehenderit in maiores.</p>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem, magni?</p>
+    <img src="http://placekitten.com/300" alt="Cute kitten photo">
+    <a class="big" href="http://google.com/">Go to Google!</a>
+    <ul id="hobbies">
+        <li>Coding</li>
+        <li>Gaming</li>
+        <li>Reading</li>
+
+    </ul>
+
+    <ul>
+        <li>One</li>
+        <li>Two</li>
+        <li>Three</li>
+    <ul>
+
+
+
 </body>
 </html>
