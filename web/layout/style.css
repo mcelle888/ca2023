@@ -1,0 +1,54 @@
+
+/*CSS Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+h1, body > p {
+    background-color:#dde0e3;
+}
+
+h1 {
+    padding: 4rem;
+    border: double red;
+    border-width: 0.5vw 1vw;
+}
+
+body > p {
+    /*4 values applies clockwise from top (so NESW) */
+    /*3 values is the middle value is left and right value */
+    /* 2 values first is top and bottom and second is left and right */
+    padding: 1rem 2rem;
+   /* padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 1rem;
+    padding-right: 1rem; */
+    margin: 1rem;
+}
+
+em, strong {
+   /* display:block; */
+    background-color:#b2d6ff;
+}
+
+.btn {
+    color:white;
+    background-color: #5995da;
+    font-weight: bold;
+    padding: 1.5rem;
+    text-align: center;
+    border: 2px solid blue;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
+    width: 33%;
+    
+    
+}
+
+.btn img{
+    width: 50%;
+}
+
