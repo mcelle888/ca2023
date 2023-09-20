@@ -1,0 +1,44 @@
+* {
+    box-sizing:border-box;
+    margin: 0;
+    padding: 0;
+}
+
+div {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 1rem;
+    background-color: red;
+}
+
+/* Selects the 2nd child that is a div
+
+div:nth-child(2) {
+    background-color: blue;
+} */
+
+/* Select the 2nd child of the body regardless of what it is
+
+body :nth-child(2) {
+    background-color: blue;
+}
+ */
+
+
+ div:nth-of-type(2) {
+    position: absolute;
+    /* abosulte means relative to the body (parent container) */
+    /* fixed is like absolute but it doesnt scroll with in viewpoint, it is anchored on page */
+    background-color:blue;
+    top: 100px;
+    left:150px;
+    z-index: 1
+    /* z-index: the depth to control layering. higher z values will stack over */
+ }
+
+ div:nth-of-type(3) {
+    background: green;
+
+ }
+
