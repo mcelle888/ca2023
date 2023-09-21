@@ -1,0 +1,44 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+@keyframes colorful-text {
+    0% {
+        background: salmon; 
+    }
+    50% {
+        background: yellow;
+        transform: translate(100px);
+    }
+    100% { 
+        background: blue;
+        transform: translate(100px) rotate(45deg);
+
+    }
+}
+
+div {
+    position: relative;
+    /* left: -90px; */
+    width: 100px;
+    height: 100px;
+    background-color: salmon;
+    transition: transform 2s;
+   
+    /* second value is time delay before transition begins */
+
+    /* transform:scaleX(0.5); */
+    /* can scale from x or y axis */
+
+    
+}
+div:hover {
+    /* left: 0; */
+    /* transform:translateX(100px) rotate(90deg) scale(0.5,2); */
+    animation: colorful-text 3s alternate both;
+    /* height: 200px; */
+    /* background: green; */
+}
+
