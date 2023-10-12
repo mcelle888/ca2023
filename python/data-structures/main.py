@@ -78,3 +78,6 @@ from colort import colorize, ForegroundColor as fc, Style, BackgroundColor as bc
 
 colored_text = colorize('Hello World!', fc.GREEN, Style.BOLD, bc.YELLOW)
 print("colored text: ", colored_text)
+
+
+# pip freeze in the terminal will show us all the packages/dependencies that are in use 
