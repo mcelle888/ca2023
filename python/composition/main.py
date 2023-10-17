@@ -1,8 +1,9 @@
 import rpg
 
-aragorn = rpg.Character('Aragorn','Human')
-galadriel = rpg.Character('Galadriel', 'Elf')
-frodo = rpg.Character('Frodo','Hobbit')
+aragorn = rpg.Ranger('Aragorn','Human', 100, 50)
+galadriel = rpg.Mage('Galadriel', 'Elf', 120, 75)
+frodo = rpg.Burglar('Frodo','Hobbit', 50, 25)
+saruman = rpg.Wizard('Saruman', 'Human', 80, 100)
 
 # Setter
 
@@ -34,8 +35,14 @@ print(chest.inv.__dict__)
 # Frodo loots a chest!
 chest.inv.transfer(frodo.inv)
 # transfer is a method of inventory not chest. The from is chest.inv and to is frodo.inv
+
+
 print(frodo.inv.__dict__)
 print(frodo.inv.get_currency())
 print(chest.inv.__dict__)
 
 
+# FIGHT
+
+saruman.battle(aragorn)
+frodo.battle(aragorn)
