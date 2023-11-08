@@ -27,7 +27,15 @@ create table items (
     description text not null,
     category_id integer not null,
 
-    foreign key (category_id) references categories (id)
+    foreign key (category_id) references categories (id) on delete cascade 
     -- telling us it will reference id column in categogries table
     );
+
+insert into items (name, description, category_id) values 
+    ('Skyrim', 'Awesome open-world RPG', 4),
+    ('World of Warcraft', 'Popular MMORPG', 4),
+    ('iPhone', 'Apple''s flagship smartphone', 1), 
+    ('Greg Norman golf clubs', 'At least you can look like a pro', 3)
+;
+
 
