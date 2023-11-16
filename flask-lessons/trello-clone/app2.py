@@ -41,11 +41,11 @@ class Card(db.Model):
     status = db.Column(db.String(30))
     # date created in date type
     date_created = db.Column(db.Date())
+    
+    def to_dict(self):
+        return {'id': self.id, 'title': self.title, 'description': self.description, 'status': self.status, 'date_created': self.date_created}
 
-# Class to tell marshmallow which fields we want to serialise which is done through a "SCHEMA"
-class CardSchema(ma.Schema):
-    class Meta:
-        fields = ('id', 'title', 'description', 'status', 'date_created')
+
 
 
 # we've declared the class but now we need to define all the models we need. Once these declarations are done, to create the tables in the physical database, we need to call the create all method. What we're declaring here is a custom terminal command
@@ -130,7 +130,7 @@ def all_cards():
     #     print(card.__dict__)
     #     # more specific data:
     #     print(card.title)
-    return CardSchema(many = True).dump(cards)
+    return 
 
     
 
