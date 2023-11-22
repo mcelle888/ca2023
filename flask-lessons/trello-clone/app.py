@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import date
 from flask_marshmallow import Marshmallow
 from flask_bcrypt import Bcrypt
+from sqlalchemy.exc import IntegrityError
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+from datetime import timedelta
 
 app = Flask(__name__)
 # CREATE configurations (set up database uri in the config)
@@ -11,7 +14,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://trello_dev:spameggs123@127.0.0.1:5432/trello'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # psycopg2 is an adapter, next trello_dev is the user followed by the password, the port and finally the database name
-
+app.config['JWT_SECRET_KEY'] ='Ministry of Silly Walks'
 
 
 # now we can create sql alchemt instance (must be after the config setting but before anything else like routes and error handling. So as early as possible but still after the config setting)
@@ -19,6 +22,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 
 
 # now we define models (we define and declare our columns in python as classes and the orm, when we call method eg get all the users, the orm takes care of sql and brings data to us to use in python)
@@ -127,23 +131,27 @@ def db_seed():
 
 @app.route('/users/register', methods = ['POST'])
 def register():
-    # parse incoming POST body through the schema
-    user_info = UserSchema(exclude=['id']).load(request.json)
-    # create new user with parsed data
-    user = User(
-        email = user_info['email'], 
-        password = bcrypt.generate_password_hash(user_info['password']).decode('utf8'),
-        name = user_info.get('name', '')
-    )
-    print(user)
-    # add and commit new user to the database
-    db.session.add(user)
-    db.session.commit()
-    # return the new user
-    return UserSchema(exclude= ['password']).dump(user), 201
+    try:
+        # parse incoming POST body through the schema
+        user_info = UserSchema(exclude=['id']).load(request.json)
+        # create new user with parsed data
+        user = User(
+            email = user_info['email'], 
+            password = bcrypt.generate_password_hash(user_info['password']).decode('utf8'),
+            name = user_info.get('name', '')
+        )
+        print(user)
+        # add and commit new user to the database
+        db.session.add(user)
+        db.session.commit()
+        # return the new user
+        return UserSchema(exclude= ['password']).dump(user), 201
+    except IntegrityError:
+        return {'error': 'Email address already in use'}, 409
 
 # QUERY
 @app.route('/cards')
+@jwt_required()
 def all_cards():
     # select & from cards is what we're looking for
     # stmt = db.select(Card)
@@ -182,8 +190,29 @@ def all_cards():
 # this converts it to a list of dictionaries (to primative python data types which are easily serialized to json which is done by flask)
 
 
+# LOG IN
+
+@app.route('/users/login', methods=['POST'])
+def login():
+    # 1. Parse incoming POST body through the schema
+    user_info = UserSchema(exclude=['id', 'name', 'is_admin']).load(request.json)
+    # 2. Select user with email that matches the one in the POST body AND    # 3. Check password hash
+    stmt = db.select(User).where(User.email == user_info['email'])
+    user = db.session.scalar(stmt)
+    if user and bcrypt.check_password_hash(user.password, user_info['password']):
+        # 4. Create a JWT token
+        token = create_access_token(identity = user.email, expires_delta = timedelta(hours = 2))
+        # 5. Send to client/ Return the token
+        return { 'token': token, 'user': UserSchema(exclude = ['password']).dump(user)}
+    else:
+        return {'error': 'Invalid email or password'}, 401
+
+
 @app.route('/')
 def index():
     return 'Hello, World!'
 
 
+# @app.errorhandler(IntegrityError)
+# def integrity_error(err):
+#     return {'error': str(err)}, 409
