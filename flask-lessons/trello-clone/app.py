@@ -1,29 +1,16 @@
-from flask import Flask, request, abort
-from flask_sqlalchemy import SQLAlchemy
-from datetime import date
-from flask_marshmallow import Marshmallow
-from flask_bcrypt import Bcrypt
-from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from datetime import timedelta
-from os import environ
-
-app = Flask(__name__)
-# CREATE configurations (set up database uri in the config)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://trello_dev:spameggs123@localhost:5432/trello'
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://trello_dev:spameggs123@127.0.0.1:5432/trello'
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-# psycopg2 is an adapter, next trello_dev is the user followed by the password, the port and finally the database name
-app.config['JWT_SECRET_KEY'] = environ.get('JWT_KEY')
+from flask import abort
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from models.user import User, UserSchema
+from setup import *
+from models.card import Card, CardSchema
+from blueprints.cli_bp import db_commands
+from blueprints.users_bp import users_bp
 
 
-# now we can create sql alchemt instance (must be after the config setting but before anything else like routes and error handling. So as early as possible but still after the config setting)
+app.register_blueprint(db_commands)
 
-db = SQLAlchemy(app)
-ma = Marshmallow(app)
-bcrypt = Bcrypt(app)
-jwt = JWTManager(app)
+app.register_blueprint(users_bp)
+
 
 def admin_required():
     user_email = get_jwt_identity()
@@ -38,127 +25,14 @@ def unauthorized(err):
     return {'Error': 'You must be an administrator'}
 # now we define models (we define and declare our columns in python as classes and the orm, when we call method eg get all the users, the orm takes care of sql and brings data to us to use in python)
 
-class Card(db.Model):
-    # last step: we need to rename the table name to cards (plural)
-    __tablename__ = 'cards'
-# subclass db.model (inheritance)
-# this is an object that represents a table in database
-
-# first column is the primary key : serial id will automatically be made if primary key is declared
-    id = db.Column(db.Integer, primary_key = True)
-    # next column is the title:
-    title = db.Column(db.String(100))
-    # desciption
-    description = db.Column(db.Text())
-    # tracking status of a card
-    status = db.Column(db.String(30))
-    # date created in date type
-    date_created = db.Column(db.Date())
-
-# Class to tell marshmallow which fields we want to serialise which is done through a "SCHEMA"
-class CardSchema(ma.Schema):
-    class Meta:
-        fields = ('id', 'title', 'description', 'status', 'date_created')
-
-# AUTHENTICATION
-
-class User(db.Model):
-    __tablename__ = 'users'
-    
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String)
-    email = db.Column(db.String, nullable = False, unique = True)
-    password = db.Column(db.String, nullable = False)
-    is_admin = db.Column(db.Boolean, default = False)
-
-# USER SCHEMA
-
-class UserSchema(ma.Schema):
-    class Meta:
-        fields = ('id', 'name', 'email', 'password', 'is_admin')
-
 
 # we've declared the class but now we need to define all the models we need. Once these declarations are done, to create the tables in the physical database, we need to call the create all method. What we're declaring here is a custom terminal command
 
-@app.cli.command('db_create')
-def db_create():
-    # drop here so that when we want to update, we will rewrite. So we will drop everything before recreating. This was we guarantee the database is clean before we seed
-    db.drop_all()
-    db.create_all()
-    print('Created tables')
 
-# Seeding a database: inserting some test data for development purposes into our database (So we have data to work with)
-@app.cli.command('db_seed')
-def db_seed():
-
-
-    users = [
-        User(
-            email = 'admin@spam.com',
-            password = bcrypt.generate_password_hash ('spinynorman').decode('utf8'),
-            is_admin = True
-        ),
-        User(
-            name = 'John Cleese',
-            email = 'cheese@spam.com',
-            password = bcrypt.generate_password_hash ('tisbutascratch').decode('utf8'),
-        )
-    ]
-
-
-    cards = [
-    Card(
-        title = 'Start of project',
-        description = 'Stage 1 - Create ERD',
-        status = 'Done',
-        date_created = date.today()
-        ),
-    Card(
-        title = 'QRM Queries',
-        description = 'Stage 2 - Implement CRUD queries',
-        status = 'In Progress',
-        date_created = date.today()
-    ),
-    Card(
-        title = 'Marshmallow',
-        description = 'Stage 3 - Implement JSONify od models',
-        status = 'In Progress',
-        date_created = date.today()
-    ),
-    ]
-
-
-
-
-# 'session' creates a database transaction: 
-    db.session.add_all(users)
-    db.session.add_all(cards)
-    # now we must commit after writing all the edits
-    db.session.commit()
-    print('Database seeded')
 
 # We've created an instance in memory (RAM) but we havent put it into the database yet (wont do it automatically because in some instances, we may want to do other things before commiting to database) So how do we commit to the database? We add in line 48. 
 
 
-@app.route('/users/register', methods = ['POST'])
-def register():
-    try:
-        # parse incoming POST body through the schema
-        user_info = UserSchema(exclude=['id', 'is_admin']).load(request.json)
-        # create new user with parsed data
-        user = User(
-            email = user_info['email'], 
-            password = bcrypt.generate_password_hash(user_info['password']).decode('utf8'),
-            name = user_info.get('name', '')
-        )
-        print(user)
-        # add and commit new user to the database
-        db.session.add(user)
-        db.session.commit()
-        # return the new user
-        return UserSchema(exclude= ['password']).dump(user), 201
-    except IntegrityError:
-        return {'error': 'Email address already in use'}, 409
 
 # QUERY
 @app.route('/cards')
@@ -206,22 +80,6 @@ def all_cards():
 # this converts it to a list of dictionaries (to primative python data types which are easily serialized to json which is done by flask)
 
 
-# LOG IN
-
-@app.route('/users/login', methods=['POST'])
-def login():
-    # 1. Parse incoming POST body through the schema
-    user_info = UserSchema(exclude=['id', 'name', 'is_admin']).load(request.json)
-    # 2. Select user with email that matches the one in the POST body AND    # 3. Check password hash
-    stmt = db.select(User).where(User.email == user_info['email'])
-    user = db.session.scalar(stmt)
-    if user and bcrypt.check_password_hash(user.password, user_info['password']):
-        # 4. Create a JWT token
-        token = create_access_token(identity = user.email, expires_delta = timedelta(hours = 2))
-        # 5. Send to client/ Return the token
-        return { 'token': token, 'user': UserSchema(exclude = ['password']).dump(user)}
-    else:
-        return {'error': 'Invalid email or password'}, 401
 
 
 @app.route('/')
