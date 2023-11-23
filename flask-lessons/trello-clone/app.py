@@ -1,11 +1,12 @@
-from flask import Flask, request
+from flask import Flask, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date
 from flask_marshmallow import Marshmallow
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from datetime import timedelta
+from os import environ
 
 app = Flask(__name__)
 # CREATE configurations (set up database uri in the config)
@@ -14,7 +15,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://trello_dev:spameggs123@127.0.0.1:5432/trello'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # psycopg2 is an adapter, next trello_dev is the user followed by the password, the port and finally the database name
-app.config['JWT_SECRET_KEY'] ='Ministry of Silly Walks'
+app.config['JWT_SECRET_KEY'] = environ.get('JWT_KEY')
 
 
 # now we can create sql alchemt instance (must be after the config setting but before anything else like routes and error handling. So as early as possible but still after the config setting)
@@ -24,7 +25,17 @@ ma = Marshmallow(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
+def admin_required():
+    user_email = get_jwt_identity()
+    stmt = db.select(User).where(User.email == user_email)
+    user = db.session.scalar(stmt)
+    if not (user and user.is_admin):
+        abort(401)
 
+
+@app.errorhandler(401)
+def unauthorized(err):
+    return {'Error': 'You must be an administrator'}
 # now we define models (we define and declare our columns in python as classes and the orm, when we call method eg get all the users, the orm takes care of sql and brings data to us to use in python)
 
 class Card(db.Model):
@@ -133,7 +144,7 @@ def db_seed():
 def register():
     try:
         # parse incoming POST body through the schema
-        user_info = UserSchema(exclude=['id']).load(request.json)
+        user_info = UserSchema(exclude=['id', 'is_admin']).load(request.json)
         # create new user with parsed data
         user = User(
             email = user_info['email'], 
@@ -153,10 +164,12 @@ def register():
 @app.route('/cards')
 @jwt_required()
 def all_cards():
+    
+    admin_required()
     # select & from cards is what we're looking for
     # stmt = db.select(Card)
 
-    # if you want to be specific so in this case the first card:
+    # if you want to be specific so in this case the first card: 
     # stmt = db.select(Card).limit(1)
 
     # select more specific like the where statement in sql
@@ -170,9 +183,12 @@ def all_cards():
 
     # SORTING
     # Sorted ascending by card title by adding the .order_by
-    # stmt = db.select(Card).where(Card.id < 3).order_by(Card.title)
+    # stmt = db.select(Card).where(Card.id < 3).order_by(Card.title)]
+    stmt = db.select(
+        Card
+    )
     # # descending order
-    stmt = db.select(Card).where(db.or_(Card.status != 'Done', Card.id > 2)).order_by(Card.title.desc())
+    # stmt = db.select(Card).where(db.or_(Card.status != 'Done', Card.id > 2)).order_by(Card.title.desc())
 
     # scalars method telle alchemy to execute the statement and creates instances of the class for us
     cards = db.session.scalars(stmt).all()
