@@ -4,7 +4,7 @@ from models.card import Card
 from models.user import User
 from datetime import date
 
-# create an instance of a blueprint
+# create an instance of a blueprint, pass thorugh a name and then the name of the module
 
 db_commands = Blueprint('db', __name__)
 

@@ -1,4 +1,5 @@
 from setup import db, ma
+from datetime import datetime
 
 class Card(db.Model):
     # last step: we need to rename the table name to cards (plural)
@@ -9,13 +10,13 @@ class Card(db.Model):
 # first column is the primary key : serial id will automatically be made if primary key is declared
     id = db.Column(db.Integer, primary_key = True)
     # next column is the title:
-    title = db.Column(db.String(100))
+    title = db.Column(db.String(100), nullable = False)
     # desciption
     description = db.Column(db.Text())
     # tracking status of a card
-    status = db.Column(db.String(30))
+    status = db.Column(db.String(30), default = 'To do')
     # date created in date type
-    date_created = db.Column(db.Date())
+    date_created = db.Column(db.Date(), default = datetime.now().strftime("%Y-%m-%d"))
 
 # Class to tell marshmallow which fields we want to serialise which is done through a "SCHEMA"
 class CardSchema(ma.Schema):

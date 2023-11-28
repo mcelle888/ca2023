@@ -6,6 +6,8 @@ from flask import request
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
+
+# url prefix so we dont need to write /users/register, just /register
 users_bp = Blueprint('users', __name__, url_prefix = '/users')
 
 # REGISTER

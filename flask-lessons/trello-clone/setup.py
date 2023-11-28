@@ -22,3 +22,16 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+
+# ERROR HANDLING
+
+@app.errorhandler(401)
+def unauthorized(err):
+    return {'Error': 'You must be an administrator'}
+
+
+
+
+# @app.errorhandler(IntegrityError)
+# def integrity_error(err):
+#     return {'error': str(err)}, 409
