@@ -26,11 +26,15 @@ class Card(db.Model):
     user = db.relationship('User', back_populates = 'cards')
     # cards up here in populates is the cards in user.py class User model : cards = db.relationship
 
+    comments = db.relationship('Comment', back_populates = 'card')
+
+
 
 # Class to tell marshmallow which fields we want to serialise which is done through a "SCHEMA"
 class CardSchema(ma.Schema):
     # Tell Marshmallow to nest a user schema instance when serializing
     user = fields.Nested('UserSchema', exclude = ['password'])
+    comments = fields.Nested('CommentSchema', many = True, exclude = ['card'])
 
     class Meta:
-        fields = ('id', 'title', 'description', 'status', 'date_created', 'user' )
+        fields = ('id', 'title', 'description', 'status', 'date_created', 'user', 'comments' )

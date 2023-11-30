@@ -7,7 +7,7 @@ from blueprints.cards_bp import cards_bp
 app.register_blueprint(db_commands)
 # attaches the routes in users_bp tp this main app
 app.register_blueprint(users_bp)
-
 #blueprint for cards
 app.register_blueprint(cards_bp)
 
+print(app.url_map)
