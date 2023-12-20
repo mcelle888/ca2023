@@ -1,6 +1,6 @@
-let str = 'Hello world!'
+// let str = 'Hello world!'
 
-console.log(str.replaceAll('o', '---'))
+// console.log(str.replaceAll('o', '---'))
  
 
 // Python: print(f'Hello, {name}!')
@@ -55,5 +55,52 @@ console.log(str.replaceAll('o', '---'))
 // def add(x,y):
 //  return x + y 
 
-function add(x,y) {return x + y}
-console.log(add(10, 10))
+// function add(x,y) {
+//     return x + y
+// }
+
+
+// const Utils = {
+//     add: (x,y) =>  x + y,
+//     double: x => x * 2,
+//     squares: arr => arr.map(x => x ** 2)
+// }
+
+// console.log(Utils.add(10, 34))
+// // console.log(square(10))
+
+// const numbers = [12, 50, 44, 32, 2]
+// const result = Utils.squares(numbers)
+
+// console.log(result)
+
+
+// DESTRUCTURING
+
+// const people = ['Matt', 'John', 'Mary', 'Kate']
+
+// const [first, second, ...others] = people
+
+// // const first = people[0]
+// // const second = people[1]
+
+// console.log(first, second, others)
+
+// const bobBirds = ['Robin', 'Crow']
+// const sallyBirds = ['Bluejay', 'Cardinal']
+
+// // const allBirds = bobBirds.concat(sallyBirds)
+
+// const allBirds = [...bobBirds, ...sallyBirds, 'Kookaburra']
+
+// console.log(allBirds)
+// //  ... can also break up array into individual elements: in this context, ... is the expansion operator whereas before its used earlier to represent 'rest'
+// console.log(...bobBirds)
+
+
+const me = {name: 'Matt', age: 51, favouriteColor: 'red'}
+
+const me2 = {...me, favouriteColor: 'blue'}
+
+console.log(me)
+console.log(me2)
