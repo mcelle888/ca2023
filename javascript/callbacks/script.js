@@ -36,17 +36,20 @@ function getJoke() {
 
 }
 
-function fetchJoke() {
-    fetch('https://icanhazdadjoke.com/', {
+async function fetchJoke() {
+    const res = await fetch('https://icanhazdadjoke.com/', {
         headers: {
             'Accept': 'application/json'
         }
     })
-    .then(res =>res.json())
-    .then(data =>console.log(data))
+    const data = await res.json()
+    return data.joke
+    // .then(res =>res.json())
+    // .then(data =>console.log(data))
 }
 
-fetchJoke()
+fetchJoke().then(joke => console.log(joke))
+
 
 // 1. Call getJoke and pass a callback function
 // 10. Callback is called via cb in the load listener in getJoke, receiving the joke
