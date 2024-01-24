@@ -1,24 +1,8 @@
-import express, { response } from 'express'
-import mongoose from 'mongoose'
+import express  from 'express'
+import { EntryModel, CategoryModel } from './db.js'
 
 const categories = ['Food', 'Gaming', 'Coding', 'Other']
 
-const entries = [
-    {categories: 'Food', content: 'Pizza is yummy!'},
-    {categories: 'Coding', content: 'Coding is fun!'},
-    {categories: 'Gaming', content: 'Skyrim is for the Nords'}
-]
-
-mongoose.connect('')
-    .then(m =>console.log(m.connection.readyState === 1 ? 'MongoDB connected!': 'MongoDB failed to connect'))
-    .catch(err => console.error(err))
-
-const entriesSchema = new mongoose.Schema({
-    category: {type: String, required:true},
-    content: {type: String, required: true}
-})
-
-const EntryModel = mongoose.model('Entry', entriesSchema)
 
 
 const app = express() 
@@ -27,12 +11,13 @@ app.use(express.json())
 
 app.get('/', (req, res) => res.send({info: 'Journal API'}))
 
-app.get('/categories', (req, res) => res.send(categories))
+app.get('/categories', async (req, res) => res.send(await CategoryModel.find()))
 
-app.get('/entries', (req, res) => res.send(entries))
+app.get('/entries', async (req, res) => res.send(await EntryModel.find()))
 
-app.get('/entries/:id', (req, res) => {
-    const entry = entries[req.params.id - 1]
+app.get('/entries/:id', async (req, res) => {
+    const entry = await EntryModel.findById(req.params.id)
+    console.log(entry)
     if (entry) {
         res.send(entry)
     } else {
@@ -60,5 +45,38 @@ app.post('/entries', async (req, res) => {
 }
 })
 
-app.listen(8001)
+
+app.put('/entries/:id', async (req, res) => {
+    try {
+        const updatedEntry = await EntryModel.findByIdAndUpdate(req.params.id, req.body, { new: true})
+        if (updatedEntry) {
+    res.send(updatedEntry)
+        } else {
+            res.status(404).send({error: 'Entry not found'})
+        }
+    }
+    catch (err) {
+        res.status(400).send({error: err.message})
+}
+})
+
+
+app.delete('/entries/:id', async (req, res) => {
+    try {
+        const deletedEntry = await EntryModel.findByIdAndDelete(req.params.id)
+        if (deletedEntry) {
+    res.sendStatus(204)
+        } else {
+            res.status(404).send({error: 'Entry not found'})
+        }
+    }
+    catch (err) {
+        res.status(500).send({error: err.message})
+}
+})
+
+
+ 
+
+app.listen(8002)
 
