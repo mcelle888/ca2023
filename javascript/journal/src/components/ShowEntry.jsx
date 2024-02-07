@@ -4,7 +4,7 @@ const ShowEntry = ({ entry }) => {
   return entry ? (
     <>
         <h3>{entry.content}</h3>
-        <p>Posted in {entry.category}</p>
+        <p>Posted in {entry.category?.name}</p>
     
     </>
   ) : (
